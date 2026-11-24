@@ -201,6 +201,7 @@ dialog::backdrop{background:rgba(5,3,2,.7);backdrop-filter:blur(6px)}
         <textarea id="cerita" data-k="cerita" placeholder="Jual apa, untuk siapa, apa bedanya, area layanan…"></textarea>
         <div class="aksi"><button class="tombol penuh" id="isiAI"><svg class="i"><use href="#i-ai"/></svg>Tulis isi halaman dengan AI</button></div>
         <div class="status" id="stAI"></div>
+        <p class="status" style="display:block;margin-top:10px">Mau website yang benar-benar beda, dibuat AI-mu sendiri (ChatGPT, Claude, Gemini)? <a href="#" id="bukaPrd" style="color:var(--oranye2)">Buat PRD-nya dulu</a>: dokumen kebutuhan siap tempel supaya AI bekerja rapi dan tidak mengarang.</p>
       </div>
       <h2>Bagian atas</h2>
       <div class="kotak">
@@ -675,6 +676,7 @@ isiForm(); tampilPilihan(); ['produk', 'unggul', 'faq', 'tautan'].forEach(tampil
     d.innerHTML = `<h3>${esc(x.judul)}</h3><p>${esc(x.ringkas)}</p>${(x.fitur || []).length ? '<ul>' + x.fitur.slice(0, 8).map((f) => `<li>${esc(f)}</li>`).join('') + '</ul>' : ''}
       <div class="aksi"><button class="tombol" data-a="zip"><svg class="i"><use href="#i-unduh"/></svg>Unduh ZIP</button><button class="tombol ke2" data-a="repo"><svg class="i"><use href="#i-git"/></svg>GitHub</button><button class="tombol ke2" data-a="tutup">Halamanku</button></div>
       <div class="aksi"><button class="tombol penuh" data-a="isi"><svg class="i"><use href="#i-ai"/></svg>Isi dengan usahaku</button></div>
+      <div class="aksi"><button class="tombol ke2 penuh" data-a="prd"><svg class="i"><use href="#i-kode"/></svg>Buat sendiri dengan PRD</button></div>
       <div class="aksi"><button class="tombol ke2 penuh" data-a="foto"><svg class="i"><use href="#i-gaya"/></svg>Ganti foto template</button></div>
       <div class="aksi"><button class="tombol ke2 penuh" data-a="bagian"><svg class="i"><use href="#i-daftar"/></svg>Atur bagian halaman</button></div>
       <div id="bagianTpl" hidden></div>
@@ -683,6 +685,7 @@ isiForm(); tampilPilihan(); ['produk', 'unggul', 'faq', 'tautan'].forEach(tampil
     d.querySelector('[data-a=zip]').onclick = () => { Inang.bukaUrl(x.zip); toast('Membuka unduhan ZIP'); };
     d.querySelector('[data-a=repo]').onclick = () => Inang.bukaUrl(x.repo);
     d.querySelector('[data-a=tutup]').onclick = tutup;
+    d.querySelector('[data-a=prd]').onclick = () => { Inang.bukaUrl('https://malikisaputra.biz.id/prd/?template=' + encodeURIComponent(x.slug)); toast('Membuka Pembuat PRD'); };
     d.querySelector('[data-a=isi]').onclick = (e) => isiTemplate(x, e.currentTarget);
     d.querySelector('[data-a=bagian]').onclick = (e) => aturBagian(x, e.currentTarget);
     d.querySelector('[data-a=foto]').onclick = (e) => daftarFoto(x, e.currentTarget);
@@ -1021,5 +1024,6 @@ ${JSON.stringify(potong)}`;
   muat();
 })();
 </script>
+<script>document.querySelector('#bukaPrd').onclick = (e) => { e.preventDefault(); Inang.bukaUrl('https://malikisaputra.biz.id/prd/'); };</script>
 </body>
 </html>
