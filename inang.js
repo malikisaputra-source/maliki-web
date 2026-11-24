@@ -26,6 +26,7 @@ const Inang = (() => {
     return j;
   }
   function pesanGalat(kode, teks) {
+    if (kode === 503 || kode === 500) return 'Server AI sedang sibuk (banyak pengguna). Coba lagi beberapa menit lagi.';
     if (kode === 429) return 'Kuota AI habis untuk sementara (batas gratis Gemini per menit/hari). Tunggu sebentar atau coba besok, atau ganti model di Pengaturan (mis. gemini-flash-lite-latest).';
     if (kode === 400 && /API key/i.test(teks)) return 'Kunci API tidak valid. Periksa lagi di Pengaturan.';
     if (kode === 403) return 'Kunci API ditolak (tidak punya izin). Buat kunci baru di aistudio.google.com/apikey.';
@@ -38,7 +39,12 @@ const Inang = (() => {
       if (j.status >= 400) throw new Error(pesanGalat(j.status, j.teks));
       return JSON.parse(j.teks);
     }
-    const r = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json', ...header}, body: JSON.stringify(body)});
+    let r;
+    for (let coba = 0; coba < 3; coba++) {  // server sibuk (503) → tunggu sebentar lalu ulangi
+      r = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json', ...header}, body: JSON.stringify(body)});
+      if (r.status !== 503 && r.status !== 500) break;
+      await new Promise((ok) => setTimeout(ok, 2500 * (coba + 1)));
+    }
     if (!r.ok) throw new Error(pesanGalat(r.status, await r.text()));
     return r.json();
   }

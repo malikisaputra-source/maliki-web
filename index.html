@@ -668,10 +668,24 @@ isiForm(); tampilPilihan(); ['produk', 'unggul', 'faq', 'tautan'].forEach(tampil
       b.onclick = () => buka(x); w.append(b);
     });
   }
+  // Demo: paket di /kode kalau ada; kalau template punya repo sendiri, rakit dari repo (jsDelivr); kalau tidak bisa, tampilkan gambarnya
+  async function tampilDemo(x) {
+    const f = $('#pratTpl');
+    if (x.dasar) { f.removeAttribute('srcdoc'); f.src = DASAR + x.dasar + (x.demo || 'index.html'); return; }
+    f.removeAttribute('src'); f.srcdoc = '<p style="font:14px system-ui;padding:24px;color:#666">Memuat demo…</p>';
+    try {
+      const semua = await daftarBerkas(x);
+      if (!semua.includes('index.html')) throw new Error('tanpa index');
+      const h0 = hasilIsi[x.slug];
+      f.srcdoc = await rakitPratinjau(x, h0?.f || null, h0?.f ? h0.berkas[h0.f] : '', h0?.berkas['index.html'], h0?.berkas || {});
+    } catch {
+      f.srcdoc = `<div style="font:14px/1.6 system-ui;padding:20px;text-align:center;color:#444"><img src="${esc(DASAR + x.gambar)}" style="width:100%;border-radius:12px;margin-bottom:12px" alt=""><p>Demo langsung tidak tersedia untuk template ini (perlu dibangun dulu). Unduh ZIP atau buka GitHub untuk mencobanya.</p></div>`;
+    }
+  }
   function buka(x) {
     pilih = x; daftar();
-    const url = DASAR + (x.dasar || ('paket/' + x.slug + '/')) + (x.demo || 'index.html');
-    $('#pratTpl').src = url; $('#layar').classList.add('tpl-mode'); $('#panggung').classList.add('tpl-mode'); $('#zipTpl').onclick = () => { Inang.bukaUrl(x.zip); toast('Membuka unduhan ZIP'); };
+    tampilDemo(x);
+    $('#layar').classList.add('tpl-mode'); $('#panggung').classList.add('tpl-mode'); $('#zipTpl').onclick = () => { Inang.bukaUrl(x.zip); toast('Membuka unduhan ZIP'); };
     const d = $('#detailTpl'); d.hidden = false;
     d.innerHTML = `<h3>${esc(x.judul)}</h3><p>${esc(x.ringkas)}</p>${(x.fitur || []).length ? '<ul>' + x.fitur.slice(0, 8).map((f) => `<li>${esc(f)}</li>`).join('') + '</ul>' : ''}
       <div class="aksi"><button class="tombol" data-a="zip"><svg class="i"><use href="#i-unduh"/></svg>Unduh ZIP</button><button class="tombol ke2" data-a="repo"><svg class="i"><use href="#i-git"/></svg>GitHub</button><button class="tombol ke2" data-a="tutup">Halamanku</button></div>
