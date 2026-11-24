@@ -732,7 +732,8 @@ isiForm(); tampilPilihan(); ['produk', 'unggul', 'faq', 'tautan'].forEach(tampil
   }
   async function rakitPratinjau(x, f, isi, indexBaru, semuaHasil = {}) {
     let html = indexBaru || await (await fetch(cdn(x, 'index.html'))).text();
-    const dasar = `<base href="${cdn(x)}">`;
+    // <base> ke CDN membuat history.pushState/replaceState template ditolak (beda origin) → skrip template berhenti; jaga agar tidak galat
+    const dasar = `<base href="${cdn(x)}"><script>(()=>{for(const n of ['pushState','replaceState']){const a=history[n].bind(history);history[n]=(s,t,u)=>{try{return a(s,t,u);}catch(e){try{return a(s,t);}catch(e2){}}};}})();<\/script>`;
     html = /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + dasar) : dasar + html;
     const sisip = (html, nama, kode) => {
       const re = new RegExp(`<script([^>]*)src=["']\\.?/?${nama.replace('.', '\\.')}(\\?[^"']*)?["']([^>]*)>\\s*<\/script>`, 'i');
