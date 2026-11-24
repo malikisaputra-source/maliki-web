@@ -1084,5 +1084,53 @@ ${JSON.stringify(potong)}`;
   document.addEventListener('keydown', (e) => { if (!el.hidden && e.key === 'Escape') e.preventDefault(); }, true);
 })();
 </script>
+
+<div class="g-latar" id="gerbangKode" hidden role="dialog" aria-modal="true" aria-labelledby="k-judul">
+  <div class="g-kotak">
+    <p class="ey">Maliki Web</p>
+    <h2 id="k-judul">Masukkan kode akses</h2>
+    <p>Kode akses dibagikan oleh @malikisaputra. Masukkan sekali, perangkat ini akan diingat.</p>
+    <form id="k-form" style="display:grid;gap:10px">
+      <label for="k-kode" style="margin:0">Kode akses</label>
+      <input id="k-kode" type="password" autocomplete="off" placeholder="masukkan kode akses" required>
+      <button class="tombol g-mulai" id="k-masuk" type="submit">Masuk</button>
+    </form>
+    <p class="g-kecil" id="k-pesan" aria-live="polite"></p>
+  </div>
+</div>
+<script>
+(() => {
+  const SERVER = window.MW_SERVER || 'https://clipper.malikisaputra.biz.id/api/webbuilder';
+  const el = document.getElementById('gerbangKode'), pesan = document.getElementById('k-pesan'), tombol = document.getElementById('k-masuk');
+  const ambil = () => { try { return localStorage.getItem('mw-token') || ''; } catch { return ''; } };
+  const simpan = (t) => { try { t ? localStorage.setItem('mw-token', t) : localStorage.removeItem('mw-token'); } catch {} };
+  const follow = document.getElementById('gerbang');
+  let followTampil = follow && !follow.hidden; if (follow) follow.hidden = true;  // follow ditampilkan setelah kode lolos
+  const lanjut = () => { el.hidden = true; if (follow && followTampil) follow.hidden = false; };
+  async function kirim(jalur, isi) {
+    const r = await fetch(SERVER + jalur, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(isi)});
+    const j = await r.json().catch(() => ({}));
+    return {ok: r.ok && j.ok !== false, j, status: r.status};
+  }
+  async function mulai() {
+    const t = ambil();
+    if (t) {
+      try { const h = await kirim('/cek', {token: t}); if (h.ok) return lanjut(); if (h.status !== 401) return lanjut(); simpan(''); }
+      catch { return lanjut(); }  // server tidak terjangkau: pengguna yang sudah pernah masuk tetap bisa memakai
+    }
+    el.hidden = false; setTimeout(() => document.getElementById('k-kode').focus(), 50);
+  }
+  document.getElementById('k-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); tombol.disabled = true; pesan.textContent = 'Memeriksa…';
+    try {
+      const h = await kirim('/masuk', {kode: document.getElementById('k-kode').value.trim()});
+      if (h.ok && h.j.token) { simpan(h.j.token); pesan.textContent = ''; lanjut(); }
+      else pesan.textContent = h.status === 429 ? 'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.' : (h.j.galat || 'Kode akses salah.');
+    } catch { pesan.textContent = 'Tidak bisa menghubungi server. Periksa internet lalu coba lagi.'; }
+    finally { tombol.disabled = false; }
+  });
+  mulai();
+})();
+</script>
 </body>
 </html>
